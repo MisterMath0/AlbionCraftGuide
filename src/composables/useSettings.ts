@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { PREM_TAX, FREE_TAX, CITIES, SERVERS, TIERS, TAX_OPTIONS } from '../utils/constants'
+import { LANGUAGES } from '@/utils/localization'
 
 const server = ref(SERVERS[0].value)
 const startCity = ref(CITIES[0])
@@ -9,7 +10,7 @@ const nutritionCost = ref(500)
 const isPremium = ref(true)
 const quality = ref(1)
 const enchantmentLevel = ref(0)
-const language = ref('EN-US')
+const language = ref(LANGUAGES[0])
 const selectedCategory = ref(null)
 const forceSingleCraft = ref(true)
 const selectedTier = ref(null)

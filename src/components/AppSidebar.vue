@@ -11,7 +11,6 @@ import {
   IconBow,
   IconHelp,
   IconInnerShadowTop,
-  IconSearch,
   IconSettings,
   IconBookmark,
 } from "@tabler/icons-vue"

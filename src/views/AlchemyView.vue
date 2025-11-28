@@ -118,4 +118,26 @@ function handleSavePreset(selectedRows) {
   console.log('Save preset:', selectedRows)
   // TODO: Implement preset saving logic
 }
+
+function getCurrentState() {
+  if (!tableRef.value) return []
+  const selectedRows = tableRef.value.table.getFilteredSelectedRowModel().rows
+  return selectedRows.map(row => ({
+    id: row.original.id,
+    name: row.original.name,
+    productPrice: row.original.productPrice,
+    profit: row.original.profit,
+    ingredients: row.original.ingredients || []
+  }))
+}
+
+function loadPreset(items) {
+  // TODO: Load preset items into the table
+  console.log('Loading preset items:', items)
+}
+
+defineExpose({
+  getCurrentState,
+  loadPreset
+})
 </script>

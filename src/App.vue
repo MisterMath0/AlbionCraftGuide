@@ -28,8 +28,8 @@
       </header>
       
       <main class="flex-1 overflow-auto p-4">
-        <CookingView v-if="currentView === 'cooking'" />
-        <AlchemyView v-else-if="currentView === 'alchemy'" />
+        <CookingView v-if="currentView === 'cooking'" ref="cookingViewRef" />
+        <AlchemyView v-else-if="currentView === 'alchemy'" ref="alchemyViewRef" />
         <div v-else class="flex items-center justify-center h-full">
           <div class="text-center">
             <h2 class="text-2xl font-semibold mb-2">Coming Soon</h2>
@@ -52,7 +52,9 @@ import AlchemyView from './views/AlchemyView.vue'
 import { usePresets } from './composables/usePresets'
 
 const currentView = ref('cooking')
-const { presets, selectedPresetId, createPreset, deletePreset, selectPreset } = usePresets()
+const cookingViewRef = ref(null)
+const alchemyViewRef = ref(null)
+const { presets, selectedPresetId, createPreset, deletePreset, selectPreset, getPreset } = usePresets()
 
 const currentViewTitle = computed(() => {
   const titles = {
@@ -71,7 +73,20 @@ function handleNavigate(view) {
 
 function handleSelectPreset(id) {
   selectPreset(id)
-  // TODO: Load preset data into the view
+  const preset = getPreset(id)
+  if (preset) {
+    // Navigate to the preset's craft type if different
+    if (preset.craftType !== currentView.value) {
+      currentView.value = preset.craftType
+    }
+    // Load preset data into the view
+    setTimeout(() => {
+      const viewRef = currentView.value === 'cooking' ? cookingViewRef.value : alchemyViewRef.value
+      if (viewRef && viewRef.loadPreset) {
+        viewRef.loadPreset(preset.items)
+      }
+    }, 100)
+  }
 }
 
 function handleDeletePreset(id) {
@@ -83,8 +98,15 @@ function handleDeletePreset(id) {
 function handleCreatePreset() {
   const name = prompt('Enter preset name:')
   if (name && name.trim()) {
-    // TODO: Get selected items from current view
-    createPreset(name.trim(), currentView.value, [])
+    const viewRef = currentView.value === 'cooking' ? cookingViewRef.value : alchemyViewRef.value
+    const items = viewRef && viewRef.getCurrentState ? viewRef.getCurrentState() : []
+    
+    if (items.length === 0) {
+      alert('Please select some items first!')
+      return
+    }
+    
+    createPreset(name.trim(), currentView.value, items)
   }
 }
 </script>

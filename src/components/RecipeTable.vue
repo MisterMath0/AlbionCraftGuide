@@ -312,23 +312,33 @@ const columns = computed(() => {
   cols.push({
     id: 'select',
     header: ({ table }) => h('div', { 
-      class: 'relative z-10',
+      class: 'flex items-center justify-center relative z-10',
       onClick: (e) => e.stopPropagation() 
     }, [
-      h(Checkbox, {
-        'checked': table.getIsAllPageRowsSelected(),
-        'onUpdate:checked': (value) => table.toggleAllPageRowsSelected(!!value),
-        'ariaLabel': 'Select all',
+      h('input', {
+        type: 'checkbox',
+        class: 'cursor-pointer w-4 h-4',
+        checked: table.getIsAllPageRowsSelected(),
+        onChange: (e) => {
+          e.stopPropagation()
+          table.toggleAllPageRowsSelected(!!e.target.checked)
+        },
+        onClick: (e) => e.stopPropagation(),
       })
     ]),
     cell: ({ row }) => h('div', { 
-      class: 'relative z-10',
+      class: 'flex items-center justify-center relative z-10',
       onClick: (e) => e.stopPropagation() 
     }, [
-      h(Checkbox, {
-        'checked': row.getIsSelected(),
-        'onUpdate:checked': (value) => row.toggleSelected(!!value),
-        'ariaLabel': 'Select row',
+      h('input', {
+        type: 'checkbox',
+        class: 'cursor-pointer w-4 h-4',
+        checked: row.getIsSelected(),
+        onChange: (e) => {
+          e.stopPropagation()
+          row.toggleSelected(!!e.target.checked)
+        },
+        onClick: (e) => e.stopPropagation(),
       })
     ]),
     enableSorting: false,

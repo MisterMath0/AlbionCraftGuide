@@ -11,7 +11,10 @@
             class="w-12 h-12"
           />
           <div>
-            <div class="text-xl">{{ productDisplayName }}</div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl">{{ productDisplayName }}</span>
+              <CopyNameButton :display-name="productDisplayName" />
+            </div>
             <div class="text-sm text-muted-foreground">
               Quantity: {{ recipe?.quantity || 1 }} | Enchantment: {{ recipe?.enchant || '0' }}
             </div>
@@ -31,13 +34,21 @@
             <!-- Craft Quantity -->
             <div class="space-y-2">
               <Label for="craftQty">Number of Crafts</Label>
-              <Input 
-                id="craftQty"
-                v-model.number="localCraftQuantity"
-                type="number"
-                min="1"
-                class="w-full"
-              />
+              <InputGroup class="w-32">
+                <InputGroupButton @click="localCraftQuantity = Math.max(1, localCraftQuantity - 1)">
+                  <Minus class="w-4 h-4" />
+                </InputGroupButton>
+                <InputGroupInput
+                  id="craftQty"
+                  v-model.number="localCraftQuantity"
+                  type="number"
+                  min="1"
+                  class="text-center"
+                />
+                <InputGroupButton @click="localCraftQuantity++">
+                  <Plus class="w-4 h-4" />
+                </InputGroupButton>
+              </InputGroup>
               <p class="text-xs text-muted-foreground">
                 Total items produced: {{ totalProduced }}
               </p>
@@ -46,17 +57,25 @@
             <!-- Product Price -->
             <div class="space-y-2">
               <Label for="productPrice">Sell Price (per item)</Label>
-              <Input 
-                id="productPrice"
-                v-model.number="localProductPrice"
-                type="number"
-                min="0"
-                class="w-full"
-              />
+              <InputGroup class="w-32">
+                <InputGroupButton @click="localProductPrice = Math.max(0, localProductPrice - 1)">
+                  <Minus class="w-4 h-4" />
+                </InputGroupButton>
+                <InputGroupInput
+                  id="productPrice"
+                  v-model.number="localProductPrice"
+                  type="number"
+                  min="0"
+                  class="text-center"
+                />
+                <InputGroupButton @click="localProductPrice++">
+                  <Plus class="w-4 h-4" />
+                </InputGroupButton>
+              </InputGroup>
             </div>
 
             <!-- Revenue Calculation -->
-            <div class="rounded-md bg-muted p-3 space-y-1">
+            <div class="rounded-md  p-3 space-y-1">
               <div class="flex justify-between text-sm">
                 <span>Base Revenue:</span>
                 <span class="font-medium">{{ formatNumber(baseRevenue) }}</span>
@@ -132,11 +151,9 @@
                     class="w-8 h-8"
                   />
                   <div class="flex-1">
-                    <div class="font-medium text-sm">
-                      {{ getIngredientName(ingredient.id) }}
-                    </div>
-                    <div class="text-xs text-muted-foreground">
-                      {{ ingredient.excluded ? 'Excluded from RRR' : 'Affected by RRR' }}
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium text-sm">{{ getIngredientName(ingredient.id) }}</span>
+                      <CopyNameButton :display-name="getIngredientName(ingredient.id)" />
                     </div>
                   </div>
                 </div>
@@ -156,18 +173,26 @@
                   </div>
                   <div class="space-y-1">
                     <Label :for="`cost-${index}`" class="text-xs">Cost per item</Label>
-                    <Input 
-                      :id="`cost-${index}`"
-                      v-model.number="ingredient.cost"
-                      type="number"
-                      min="0"
-                      class="h-8"
-                    />
+                    <InputGroup>
+                      <InputGroupButton @click="ingredient.cost = Math.max(0, ingredient.cost - 1)">
+                        <Minus class="w-3 h-3" />
+                      </InputGroupButton>
+                      <InputGroupInput
+                        :id="`cost-${index}`"
+                        v-model.number="ingredient.cost"
+                        type="number"
+                        min="0"
+                        class="h-8 text-center"
+                      />
+                      <InputGroupButton @click="ingredient.cost++">
+                        <Plus class="w-3 h-3" />
+                      </InputGroupButton>
+                    </InputGroup>
                   </div>
                 </div>
 
                 <!-- Material Cost Breakdown -->
-                <div class="rounded bg-muted p-2 space-y-1">
+                <div class="rounded  p-2 space-y-1">
                   <div class="flex justify-between text-xs">
                     <span>Base cost:</span>
                     <span>{{ formatNumber(ingredient.quantity * ingredient.cost) }}</span>
@@ -202,7 +227,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Minus, Plus } from 'lucide-vue-next'
 import ItemIcon from '@/components/ItemIcon.vue'
+import CopyNameButton from '@/components/CopyNameButton.vue'
 import { getItemName, type Language } from '@/utils/localization'
 
 interface Ingredient {

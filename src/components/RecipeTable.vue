@@ -87,6 +87,7 @@ import ItemIcon from './ItemIcon.vue'
 import RecipeTableToolbar from './RecipeTableToolbar.vue'
 import RecipeTablePagination from './RecipeTablePagination.vue'
 import RecipeDetailDialog from './RecipeDetailDialog.vue'
+import CopyNameButton from './CopyNameButton.vue'
 import { ArrowUpDown } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -358,7 +359,10 @@ const columns = computed(() => {
           class: 'w-8 h-8',
           alt: displayName
         }),
-        h('span', { class: 'text-sm' }, displayName)
+        h('div', { class: 'flex items-center gap-2' }, [
+          h('span', { class: 'text-sm' }, displayName),
+          h(CopyNameButton, { displayName: displayName })
+        ])
       ])
     },
     filterFn: (row, columnId, filterValue) => {
@@ -447,7 +451,10 @@ const columns = computed(() => {
             class: 'w-6 h-6',
             alt: displayName
           }),
-          h('span', { class: 'text-sm' }, displayName)
+          h('div', { class: 'flex items-center gap-2' }, [
+            h('span', { class: 'text-sm' }, displayName),
+            h(CopyNameButton, { displayName: displayName })
+          ])
         ])
       },
       size: 200

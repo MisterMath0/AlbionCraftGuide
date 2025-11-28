@@ -49,7 +49,7 @@
       :show-nutrition="true"
       :different-end-city="true"
       :enable-enchant-upgrade="false"
-      :enchant-level-filter="null"
+      :enchant-level-filter="enchantmentLevel === 0 ? null : String(enchantmentLevel)"
       :hide-unprofitable="hideUnprofitable"
     />
   </div>

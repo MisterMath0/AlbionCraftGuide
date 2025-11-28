@@ -27,22 +27,28 @@ export class Recipe {
     city: string,
     rrr: number,
     nutritioncost: number,
-    tax: number
+    tax: number,
+    forceSingleCraft: boolean
   ): number {
-    const profit = itemmap.getPrice(this.result, quality, city) * this.quantity * (1 - tax)
-    return profit - this.calcCost(itemmap, city, rrr, nutritioncost)
+    const price = itemmap.getPrice(this.result, quality, city) * this.quantity
+    const hasExclusions = this.exlude.length > 0 || forceSingleCraft
+    const revenue = hasExclusions ? price : (price / (1 - rrr))
+    const cost = this.calcCost(itemmap, city, rrr, nutritioncost, hasExclusions)
+    return revenue * (1 - tax) - cost
   }
 
-  calcCost(itemmap: ItemMap, city: string, rrr: number, nutritioncost: number): number {
+  calcCost(itemmap: ItemMap, city: string, rrr: number, nutritioncost: number, hasExclusions: boolean): number {
     let investment = 0
     for (const key of this.ingredients.keys()) {
+      const materialCost = this.ingredients.get(key)! * itemmap.getPrice(key, 1, city)
       if (!this.isExcluded(key)) {
-        investment = investment + (this.ingredients.get(key)! * itemmap.getPrice(key, 1, city)) * (1 - rrr)
+        investment = investment + materialCost * (1 - rrr)
       } else {
-        investment = investment + this.ingredients.get(key)! * itemmap.getPrice(key, 1, city)
+        investment = investment + materialCost
       }
     }
-    return investment + this.nutrition * nutritioncost
+    const nutritionMultiplier = hasExclusions ? 1 : (1 / (1 - rrr))
+    return investment + (this.nutrition * nutritioncost * nutritionMultiplier)
   }
 
   isExcluded(itemname: string): boolean {

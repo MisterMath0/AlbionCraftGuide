@@ -81,6 +81,11 @@ const { itemMap } = useMarketData()
 
 const selectedRowId = ref(null)
 
+// Debounce RRR and nutrition to prevent re-render on every keystroke
+import { refDebounced } from '@vueuse/core'
+const debouncedRRR = refDebounced(rrrRate, 500)
+const debouncedNutrition = refDebounced(nutritionCost, 500)
+
 class OverridableItemMap extends ItemMap {
   constructor(baseMap, priceOverrides, costOverrides) {
     super()
@@ -114,8 +119,8 @@ const tableData = computed(() => {
   const city = startCity.value
   const sellCity = props.differentEndCity ? endCity.value : city
   const qual = quality.value || 1
-  const rrr = rrrRate.value
-  const nutri = nutritionCost.value
+  const rrr = debouncedRRR.value
+  const nutri = debouncedNutrition.value
   const taxRate = tax.value
 
   // Apply enchant upgrade transformation if enabled

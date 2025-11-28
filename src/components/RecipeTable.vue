@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full">
+  <div class="w-full space-y-4">
     <div class="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
@@ -36,6 +36,8 @@
         </TableBody>
       </Table>
     </div>
+    
+    <RecipeTablePagination :table="table" />
   </div>
 </template>
 
@@ -44,8 +46,13 @@ import { ref, computed, watch, h } from 'vue'
 import {
   FlexRender,
   getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
   useVueTable,
 } from '@tanstack/vue-table'
+import { refDebounced } from '@vueuse/core'
+import { valueUpdater } from '@/lib/utils'
 import {
   Table,
   TableBody,
@@ -55,11 +62,16 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
 import { useSettings } from '@/composables/useSettings'
 import { useMarketData } from '@/composables/useMarketData'
 import { ItemMap } from '@/utils/Item_Map'
 import { Recipe } from '@/utils/Recipe'
 import { getItemName } from '@/utils/localization'
+import RecipeTableToolbar from './RecipeTableToolbar.vue'
+import RecipeTablePagination from './RecipeTablePagination.vue'
+import { ArrowUpDown } from 'lucide-vue-next'
 
 const props = defineProps({
   recipes: { type: Array, required: true },
@@ -70,10 +82,10 @@ const props = defineProps({
   enableEnchantUpgrade: { type: Boolean, default: false },
   forceSingleCraft: { type: Boolean, default: false },
   hideUnprofitable: { type: Boolean, default: false },
-  enchantLevelFilter: { type: String, default: null } // Filter to show only specific enchant level
+  enchantLevelFilter: { type: String, default: null }
 })
 
-const emit = defineEmits(['rowSelect'])
+const emit = defineEmits(['rowSelect', 'savePreset'])
 
 const settings = useSettings()
 const { startCity, endCity, quality, rrrRate, nutritionCost, tax, language, isPremium, forceSingleCraft } = settings
@@ -82,9 +94,15 @@ const { itemMap } = useMarketData()
 const selectedRowId = ref(null)
 
 // Debounce RRR and nutrition to prevent re-render on every keystroke
-import { refDebounced } from '@vueuse/core'
 const debouncedRRR = refDebounced(rrrRate, 500)
 const debouncedNutrition = refDebounced(nutritionCost, 500)
+
+// Table state
+const sorting = ref([])
+const columnFilters = ref([])
+const columnVisibility = ref({})
+const rowSelection = ref({})
+const expanded = ref({})
 
 class OverridableItemMap extends ItemMap {
   constructor(baseMap, priceOverrides, costOverrides) {
@@ -122,6 +140,7 @@ const tableData = computed(() => {
   const rrr = debouncedRRR.value
   const nutri = debouncedNutrition.value
   const taxRate = tax.value
+  const hideUnprofitable = props.hideUnprofitable // Explicitly capture prop for reactivity
 
   // Apply enchant upgrade transformation if enabled
   let processedRecipes = props.recipes
@@ -157,7 +176,7 @@ const tableData = computed(() => {
   }
 
   // Filter unprofitable if enabled
-  if (props.hideUnprofitable) {
+  if (hideUnprofitable) {
     rows = rows.filter(row => row.profit >= 1)
   }
 
@@ -265,26 +284,57 @@ function selectRuneAmount(itemName) {
 const columns = computed(() => {
   const cols = []
   
+  // Selection checkbox column
+  cols.push({
+    id: 'select',
+    header: ({ table }) => h(Checkbox, {
+      'checked': table.getIsAllPageRowsSelected(),
+      'onUpdate:checked': (value) => table.toggleAllPageRowsSelected(!!value),
+      'ariaLabel': 'Select all',
+    }),
+    cell: ({ row }) => h(Checkbox, {
+      'checked': row.getIsSelected(),
+      'onUpdate:checked': (value) => row.toggleSelected(!!value),
+      'ariaLabel': 'Select row',
+    }),
+    enableSorting: false,
+    enableHiding: false,
+    size: 40
+  })
+  
   // Enchantment column
   if (props.showEnchant) {
     cols.push({
       accessorKey: 'enchant',
       header: 'En',
       cell: ({ row }) => h('div', { class: 'text-sm text-center' }, row.getValue('enchant')),
-      size: 40
+      size: 40,
+      enableSorting: false,
     })
   }
   
-  // Product name column
+  // Product name column (sortable and filterable)
   cols.push({
     accessorKey: 'productName',
-    header: 'Product',
+    header: ({ column }) => {
+      return h(Button, {
+        variant: 'ghost',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+      }, () => ['Product', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+    },
     cell: ({ row }) => {
       const itemId = row.getValue('productName')
       const displayName = props.itemNames 
         ? getItemName(itemId, language.value, props.itemNames)
         : itemId
       return h('div', { class: 'text-sm' }, displayName)
+    },
+    filterFn: (row, columnId, filterValue) => {
+      const itemId = row.getValue(columnId)
+      const displayName = props.itemNames 
+        ? getItemName(itemId, language.value, props.itemNames)
+        : itemId
+      return displayName.toLowerCase().includes(filterValue.toLowerCase())
     },
     size: 200
   })
@@ -326,10 +376,15 @@ const columns = computed(() => {
     size: 80
   })
   
-  // Profit column
+  // Profit column (sortable)
   cols.push({
     accessorKey: 'profit',
-    header: 'Profit',
+    header: ({ column }) => {
+      return h(Button, {
+        variant: 'ghost',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+      }, () => ['Profit', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+    },
     cell: ({ row }) => {
       const profit = row.getValue('profit')
       const color = profit > 0 ? 'text-green-500' : 'text-red-500'
@@ -399,12 +454,35 @@ const table = useVueTable({
   get data() { return tableData.value },
   get columns() { return columns.value },
   getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
+  onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
+  onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
+  onRowSelectionChange: updaterOrValue => valueUpdater(updaterOrValue, rowSelection),
+  state: {
+    get sorting() { return sorting.value },
+    get columnFilters() { return columnFilters.value },
+    get columnVisibility() { return columnVisibility.value },
+    get rowSelection() { return rowSelection.value },
+  },
 })
 
 function handleRowClick(row) {
   selectedRowId.value = row.id
   emit('rowSelect', row.original)
 }
+
+function handleSavePreset() {
+  const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original)
+  emit('savePreset', selectedRows)
+}
+
+defineExpose({
+  table,
+  handleSavePreset
+})
 
 // Force recalculation when overrides change
 watch([priceOverrides, costOverrides], () => {

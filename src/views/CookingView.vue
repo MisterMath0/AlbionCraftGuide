@@ -11,9 +11,10 @@
         <PremiumToggle v-model="isPremium" />
     </div>
 
-    <div class="actions flex gap-2 mb-4">
+    <div class="actions flex gap-2 mb-4 items-center">
       <UpdateButton @click="updateTable" :loading="isLoading" />
       <HideUnprofitableButton v-model="hideUnprofitable" />
+      <RecipeTableToolbar v-if="tableRef" :table="tableRef.table" :item-names="itemNames" @save-preset="handleSavePreset" />
     </div>
 
     <Empty v-if="isLoading">
@@ -41,6 +42,7 @@
 
     <RecipeTable 
       v-else
+      ref="tableRef"
       :recipes="recipes"
       :item-names="itemNames"
       :show-enchant="false"
@@ -70,6 +72,7 @@ import ForceSingleCraftToggle from '@/components/controls/ForceSingleCraftToggle
 import UpdateButton from '@/components/controls/UpdateButton.vue'
 import HideUnprofitableButton from '@/components/controls/HideUnprofitableButton.vue'
 import RecipeTable from '@/components/RecipeTable.vue'
+import RecipeTableToolbar from '@/components/RecipeTableToolbar.vue'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
 import { updateItemMap } from '@/utils/api'
@@ -90,6 +93,7 @@ const {
 const { itemMap, setItemMap } = useMarketData()
 const isLoading = ref(false)
 const itemNames = ref(null)
+const tableRef = ref(null)
 
 async function updateTable() {
   isLoading.value = true
@@ -109,4 +113,9 @@ onMounted(async () => {
 watch(server, () => {
   updateTable()
 })
+
+function handleSavePreset(selectedRows) {
+  console.log('Save preset:', selectedRows)
+  // TODO: Implement preset saving logic
+}
 </script>

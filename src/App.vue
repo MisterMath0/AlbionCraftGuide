@@ -30,6 +30,8 @@
       <main class="flex-1 overflow-auto p-4">
         <CookingView v-if="currentView === 'cooking'" ref="cookingViewRef" />
         <AlchemyView v-else-if="currentView === 'alchemy'" ref="alchemyViewRef" />
+        <ButcherView v-else-if="currentView === 'butcher'" ref="butcherViewRef" />
+        <SaddlerView v-else-if="currentView === 'saddler'" ref="saddlerViewRef" />
         <div v-else class="flex items-center justify-center h-full">
           <div class="text-center">
             <h2 class="text-2xl font-semibold mb-2">Coming Soon</h2>
@@ -49,19 +51,31 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/co
 import AppSidebar from './components/AppSidebar.vue'
 import CookingView from './views/CookingView.vue'
 import AlchemyView from './views/AlchemyView.vue'
+import ButcherView from './views/ButcherView.vue'
+import SaddlerView from './views/SaddlerView.vue'
 import { usePresets } from './composables/usePresets'
 
 const currentView = ref('cooking')
 const cookingViewRef = ref(null)
 const alchemyViewRef = ref(null)
+const butcherViewRef = ref(null)
+const saddlerViewRef = ref(null)
+const toolmakerViewRef = ref(null)
+const warriorsforgeViewRef = ref(null)
+const magestowerViewRef = ref(null)
+const hunterslodgeViewRef = ref(null)
 const { presets, selectedPresetId, createPreset, deletePreset, selectPreset, getPreset } = usePresets()
 
 const currentViewTitle = computed(() => {
   const titles = {
     cooking: 'Cooking',
     alchemy: 'Alchemy',
-    refining: 'Refining',
-    crafting: 'Crafting',
+    butcher: 'Butcher',
+    saddler: 'Saddler',
+    toolmaker: 'Toolmaker',
+    warriorsforge: "Warrior's Forge",
+    magestower: "Mage's Tower",
+    hunterslodge: "Hunter's Lodge",
   }
   return titles[currentView.value] || 'Craft Guide'
 })
@@ -81,7 +95,17 @@ function handleSelectPreset(id) {
     }
     // Load preset data into the view
     setTimeout(() => {
-      const viewRef = currentView.value === 'cooking' ? cookingViewRef.value : alchemyViewRef.value
+      const viewRefs = {
+        cooking: cookingViewRef.value,
+        alchemy: alchemyViewRef.value,
+        butcher: butcherViewRef.value,
+        saddler: saddlerViewRef.value,
+        toolmaker: toolmakerViewRef.value,
+        warriorsforge: warriorsforgeViewRef.value,
+        magestower: magestowerViewRef.value,
+        hunterslodge: hunterslodgeViewRef.value,
+      }
+      const viewRef = viewRefs[currentView.value]
       if (viewRef && viewRef.loadPreset) {
         viewRef.loadPreset(preset.items)
       }
@@ -98,7 +122,17 @@ function handleDeletePreset(id) {
 function handleCreatePreset() {
   const name = prompt('Enter preset name:')
   if (name && name.trim()) {
-    const viewRef = currentView.value === 'cooking' ? cookingViewRef.value : alchemyViewRef.value
+    const viewRefs = {
+      cooking: cookingViewRef.value,
+      alchemy: alchemyViewRef.value,
+      butcher: butcherViewRef.value,
+      saddler: saddlerViewRef.value,
+      toolmaker: toolmakerViewRef.value,
+      warriorsforge: warriorsforgeViewRef.value,
+      magestower: magestowerViewRef.value,
+      hunterslodge: hunterslodgeViewRef.value,
+    }
+    const viewRef = viewRefs[currentView.value]
     const items = viewRef && viewRef.getCurrentState ? viewRef.getCurrentState() : []
     
     if (items.length === 0) {

@@ -33,6 +33,12 @@ interface Document {
 
 defineProps<{
   items: Document[]
+  activeUrl?: string
+}>()
+
+const emit = defineEmits<{
+  select: [url: string]
+  delete: [url: string]
 }>()
 
 const { isMobile } = useSidebar()
@@ -40,14 +46,15 @@ const { isMobile } = useSidebar()
 
 <template>
   <SidebarGroup class="group-data-[collapsible=icon]:hidden">
-    <SidebarGroupLabel>Documents</SidebarGroupLabel>
+    <SidebarGroupLabel>Presets</SidebarGroupLabel>
     <SidebarMenu>
       <SidebarMenuItem v-for="item in items" :key="item.name">
-        <SidebarMenuButton as-child>
-          <a :href="item.url">
-            <component :is="item.icon" />
-            <span>{{ item.name }}</span>
-          </a>
+        <SidebarMenuButton 
+          :is-active="activeUrl === item.url"
+          @click="emit('select', item.url)"
+        >
+          <component :is="item.icon" />
+          <span>{{ item.name }}</span>
         </SidebarMenuButton>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
@@ -64,27 +71,17 @@ const { isMobile } = useSidebar()
             :side="isMobile ? 'bottom' : 'right'"
             :align="isMobile ? 'end' : 'start'"
           >
-            <DropdownMenuItem>
+            <DropdownMenuItem @click="emit('select', item.url)">
               <IconFolder />
               <span>Open</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <IconShare3 />
-              <span>Share</span>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
+            <DropdownMenuItem variant="destructive" @click="emit('delete', item.url)">
               <IconTrash />
               <span>Delete</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton class="text-sidebar-foreground/70">
-          <IconDots class="text-sidebar-foreground/70" />
-          <span>More</span>
-        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   </SidebarGroup>

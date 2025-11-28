@@ -1,25 +1,44 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFolder,
+  IconChefHat,
+  IconFlask,
+  IconMeat,
+  IconHorse,
+  IconTool,
+  IconSword,
+  IconWand,
+  IconBow,
   IconHelp,
   IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
+  IconBookmark,
 } from "@tabler/icons-vue"
 
 import NavDocuments from '@/components/NavDocuments.vue'
 import NavMain from '@/components/NavMain.vue'
 import NavSecondary from '@/components/NavSecondary.vue'
 import NavUser from '@/components/NavUser.vue'
+
+interface Preset {
+  id: string
+  name: string
+  craftType: string
+}
+
+const props = defineProps<{
+  currentView?: string
+  presets?: Preset[]
+  selectedPresetId?: string
+}>()
+
+const emit = defineEmits<{
+  navigate: [view: string]
+  selectPreset: [id: string]
+  deletePreset: [id: string]
+  createPreset: []
+}>()
 import {
   Sidebar,
   SidebarContent,
@@ -38,77 +57,44 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
+      title: "Cooking",
+      url: "cooking",
+      icon: IconChefHat,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
+      title: "Alchemy",
+      url: "alchemy",
+      icon: IconFlask,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
+      title: "Butcher",
+      url: "butcher",
+      icon: IconMeat,
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
+      title: "Saddler",
+      url: "saddler",
+      icon: IconHorse,
     },
     {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Toolmaker",
+      url: "toolmaker",
+      icon: IconTool,
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Warrior's Forge",
+      url: "warriorsforge",
+      icon: IconSword,
     },
     {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Mage's Tower",
+      url: "magestower",
+      icon: IconWand,
+    },
+    {
+      title: "Hunter's Lodge",
+      url: "hunterslodge",
+      icon: IconBow,
     },
   ],
   navSecondary: [
@@ -121,31 +107,19 @@ const data = {
       title: "Get Help",
       url: "#",
       icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileDescription,
-    },
+    }
   ],
 }
+
+const presetsDocuments = computed(() => {
+  if (!props.presets || props.presets.length === 0) return []
+  
+  return props.presets.map(preset => ({
+    name: preset.name,
+    url: preset.id,
+    icon: IconBookmark,
+  }))
+})
 </script>
 
 <template>
@@ -159,15 +133,26 @@ const data = {
           >
             <a href="#">
               <IconInnerShadowTop class="!size-5" />
-              <span class="text-base font-semibold">Acme Inc.</span>
+              <span class="text-base font-semibold">Albion Craft</span>
             </a>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>
     <SidebarContent>
-      <NavMain :items="data.navMain" />
-      <NavDocuments :items="data.documents" />
+      <NavMain 
+        :items="data.navMain" 
+        :active-url="currentView"
+        @navigate="emit('navigate', $event)"
+        @create="emit('createPreset')"
+      />
+      <NavDocuments 
+        v-if="presetsDocuments.length > 0" 
+        :items="presetsDocuments" 
+        :active-url="selectedPresetId"
+        @select="emit('selectPreset', $event)"
+        @delete="emit('deletePreset', $event)"
+      />
       <NavSecondary :items="data.navSecondary" class="mt-auto" />
     </SidebarContent>
     <SidebarFooter>

@@ -12,6 +12,8 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
-    "jquery": "^3.7.1"
+    "@vitejs/plugin-vue": "^6.0.2",
+    "jquery": "^3.7.1",
+    "vue": "^3.5.25"
   }
 }

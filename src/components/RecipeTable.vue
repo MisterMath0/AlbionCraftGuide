@@ -69,6 +69,7 @@ import { useMarketData } from '@/composables/useMarketData'
 import { ItemMap } from '@/utils/Item_Map'
 import { Recipe } from '@/utils/Recipe'
 import { getItemName } from '@/utils/localization'
+import ItemIcon from './ItemIcon.vue'
 import RecipeTableToolbar from './RecipeTableToolbar.vue'
 import RecipeTablePagination from './RecipeTablePagination.vue'
 import { ArrowUpDown } from 'lucide-vue-next'
@@ -327,7 +328,16 @@ const columns = computed(() => {
       const displayName = props.itemNames 
         ? getItemName(itemId, language.value, props.itemNames)
         : itemId
-      return h('div', { class: 'text-sm' }, displayName)
+      return h('div', { class: 'flex items-center gap-2' }, [
+        h(ItemIcon, { 
+          itemId: itemId,
+          quality: quality.value || 1,
+          size: 217,
+          class: 'w-8 h-8',
+          alt: displayName
+        }),
+        h('span', { class: 'text-sm' }, displayName)
+      ])
     },
     filterFn: (row, columnId, filterValue) => {
       const itemId = row.getValue(columnId)
@@ -336,7 +346,7 @@ const columns = computed(() => {
         : itemId
       return displayName.toLowerCase().includes(filterValue.toLowerCase())
     },
-    size: 200
+    size: 280
   })
   
   // Nutrition column
@@ -354,7 +364,7 @@ const columns = computed(() => {
     accessorKey: 'quantity',
     header: '#',
     cell: ({ row }) => h('div', { class: 'text-sm text-center' }, row.getValue('quantity')),
-    size: 40
+    size: 50
   })
   
   // Price column (editable)
@@ -364,7 +374,7 @@ const columns = computed(() => {
     cell: ({ row }) => {
       return h(Input, {
         type: 'number',
-        class: 'w-20 h-8 text-sm',
+        class: 'w-24 h-8 text-sm',
         min: 0,
         modelValue: row.getValue('productPrice'),
         'onUpdate:modelValue': (value) => {
@@ -373,7 +383,7 @@ const columns = computed(() => {
         onClick: (e) => e.stopPropagation()
       })
     },
-    size: 80
+    size: 100
   })
   
   // Profit column (sortable)
@@ -390,7 +400,7 @@ const columns = computed(() => {
       const color = profit > 0 ? 'text-green-500' : 'text-red-500'
       return h('div', { class: `text-sm font-medium ${color}` }, profit)
     },
-    size: 100
+    size: 110
   })
   
   // Ingredient columns - create sets of Material/Qty/Cost for max ingredients
@@ -407,9 +417,18 @@ const columns = computed(() => {
         const displayName = props.itemNames 
           ? getItemName(ing.name, language.value, props.itemNames)
           : ing.name
-        return h('div', { class: 'text-sm' }, displayName)
+        return h('div', { class: 'flex items-center gap-2' }, [
+          h(ItemIcon, { 
+            itemId: ing.name,
+            quality: 1,
+            size: 217,
+            class: 'w-6 h-6',
+            alt: displayName
+          }),
+          h('span', { class: 'text-sm' }, displayName)
+        ])
       },
-      size: 150
+      size: 200
     })
     
     // Material quantity  
@@ -421,7 +440,7 @@ const columns = computed(() => {
         if (!ing) return null
         return h('div', { class: 'text-sm text-center' }, ing.quantity)
       },
-      size: 40
+      size: 50
     })
     
     // Material cost (editable)
@@ -434,7 +453,7 @@ const columns = computed(() => {
         
         return h(Input, {
           type: 'number',
-          class: 'w-20 h-8 text-sm',
+          class: 'w-24 h-8 text-sm',
           min: 0,
           modelValue: ing.cost,
           'onUpdate:modelValue': (value) => {
@@ -443,7 +462,7 @@ const columns = computed(() => {
           onClick: (e) => e.stopPropagation()
         })
       },
-      size: 80
+      size: 100
     })
   }
   

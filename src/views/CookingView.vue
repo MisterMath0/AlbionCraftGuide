@@ -21,6 +21,7 @@
     <RecipeTable 
       v-if="!isLoading && itemMap"
       :recipes="recipes"
+      :item-names="itemNames"
       :show-enchant="false"
       :show-nutrition="true"
       :different-end-city="true"
@@ -32,9 +33,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useSettings } from '@/composables/useSettings'
 import { useMarketData } from '@/composables/useMarketData'
+import { loadItemNames } from '@/utils/localization'
 import { materials } from '@/data/materials/cooking'
 import { recipes } from '@/data/recipes/cooking'
 import ServerSelector from '@/components/controls/ServerSelector.vue'
@@ -64,6 +66,7 @@ const {
 
 const { itemMap, setItemMap } = useMarketData()
 const isLoading = ref(false)
+const itemNames = ref(null)
 
 async function updateTable() {
   isLoading.value = true
@@ -73,6 +76,9 @@ async function updateTable() {
   isLoading.value = false
 }
 
-// Initial load
-updateTable()
+// Load item names and initial data
+onMounted(async () => {
+  itemNames.value = await loadItemNames()
+  updateTable()
+})
 </script>

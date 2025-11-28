@@ -59,9 +59,11 @@ import { useSettings } from '@/composables/useSettings'
 import { useMarketData } from '@/composables/useMarketData'
 import { ItemMap } from '@/utils/Item_Map'
 import { Recipe } from '@/utils/Recipe'
+import { getItemName } from '@/utils/localization'
 
 const props = defineProps({
   recipes: { type: Array, required: true },
+  itemNames: { type: Object, default: null },
   showEnchant: { type: Boolean, default: true },
   showNutrition: { type: Boolean, default: true },
   differentEndCity: { type: Boolean, default: false },
@@ -73,7 +75,7 @@ const props = defineProps({
 
 const emit = defineEmits(['rowSelect'])
 
-const { startCity, endCity, quality, rrrRate, nutritionCost, tax } = useSettings()
+const { startCity, endCity, quality, rrrRate, nutritionCost, tax, language } = useSettings()
 const { itemMap } = useMarketData()
 
 const selectedRowId = ref(null)
@@ -271,7 +273,13 @@ const columns = computed(() => {
   cols.push({
     accessorKey: 'productName',
     header: 'Product',
-    cell: ({ row }) => h('div', { class: 'text-sm' }, row.getValue('productName')),
+    cell: ({ row }) => {
+      const itemId = row.getValue('productName')
+      const displayName = props.itemNames 
+        ? getItemName(itemId, language.value, props.itemNames)
+        : itemId
+      return h('div', { class: 'text-sm' }, displayName)
+    },
     size: 200
   })
   
@@ -335,7 +343,10 @@ const columns = computed(() => {
       cell: ({ row }) => {
         const ing = row.original.ingredients[i]
         if (!ing) return null
-        return h('div', { class: 'text-sm' }, ing.name)
+        const displayName = props.itemNames 
+          ? getItemName(ing.name, language.value, props.itemNames)
+          : ing.name
+        return h('div', { class: 'text-sm' }, displayName)
       },
       size: 150
     })

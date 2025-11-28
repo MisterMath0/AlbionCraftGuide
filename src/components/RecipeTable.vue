@@ -38,6 +38,20 @@
     </div>
     
     <RecipeTablePagination :table="table" />
+
+    <!-- Recipe Detail Dialog -->
+    <RecipeDetailDialog
+      v-model:open="dialogOpen"
+      :recipe="selectedRecipe"
+      :item-names="itemNames"
+      :language="language"
+      :quality="quality"
+      :rrr-rate="debouncedRRR"
+      :nutrition-cost="debouncedNutrition"
+      :tax="tax"
+      :has-exclusions="hasExclusions"
+      @save="handleDialogSave"
+    />
   </div>
 </template>
 
@@ -72,6 +86,7 @@ import { getItemName } from '@/utils/localization'
 import ItemIcon from './ItemIcon.vue'
 import RecipeTableToolbar from './RecipeTableToolbar.vue'
 import RecipeTablePagination from './RecipeTablePagination.vue'
+import RecipeDetailDialog from './RecipeDetailDialog.vue'
 import { ArrowUpDown } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -93,6 +108,8 @@ const { startCity, endCity, quality, rrrRate, nutritionCost, tax, language, isPr
 const { itemMap } = useMarketData()
 
 const selectedRowId = ref(null)
+const dialogOpen = ref(false)
+const selectedRecipe = ref(null)
 
 // Debounce RRR and nutrition to prevent re-render on every keystroke
 const debouncedRRR = refDebounced(rrrRate, 500)
@@ -182,6 +199,11 @@ const tableData = computed(() => {
   }
 
   return rows
+})
+
+// Check if any recipe has exclusions (for RRR calculations)
+const hasExclusions = computed(() => {
+  return props.recipes.some(recipe => recipe.exlude && recipe.exlude.length > 0)
 })
 
 function getEnchantLevel(itemName) {
@@ -490,7 +512,27 @@ const table = useVueTable({
 
 function handleRowClick(row) {
   selectedRowId.value = row.id
+  selectedRecipe.value = row.original
+  dialogOpen.value = true
   emit('rowSelect', row.original)
+}
+
+function handleDialogSave(data) {
+  const { productPrice, ingredients, craftQuantity } = data
+  
+  // Update product price override
+  if (selectedRecipe.value) {
+    priceOverrides.value.set(selectedRecipe.value.productName, productPrice)
+    
+    // Update ingredient cost overrides
+    ingredients.forEach(ingredient => {
+      costOverrides.value.set(ingredient.id, ingredient.cost)
+    })
+    
+    // Trigger reactivity
+    priceOverrides.value = new Map(priceOverrides.value)
+    costOverrides.value = new Map(costOverrides.value)
+  }
 }
 
 function handleSavePreset() {

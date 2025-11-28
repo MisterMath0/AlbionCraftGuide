@@ -1,16 +1,14 @@
 <template>
   <div class="cooking-view p-6">
-    <h2 class="text-2xl font-bold mb-6">Cooking</h2>
-    
-    <div class="controls-grid grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <EnchantmentSelector v-model="enchantmentLevel" :max="3" />
-      <ServerSelector v-model="server" />
-      <ForceSingleCraftToggle v-model="forceSingleCraft" />
-      <CitySelector v-model="startCity" label="Start City" id="start-city" />
-      <CitySelector v-model="endCity" label="End City" id="end-city" :include-avalon="true" />
-      <RRRInput v-model="rrrRate" />
-      <NutritionInput v-model="nutritionCost" />
-      <PremiumToggle v-model="isPremium" />
+    <div class="controls-grid grid grid-cols-2 md:grid-cols-8 gap-4 mb-6 items-end">
+        <ServerSelector v-model="server" />
+        <CitySelector v-model="startCity" label="Start City" id="start-city" />
+        <CitySelector v-model="endCity" label="End City" id="end-city" :include-avalon="true" />
+        <RRRInput v-model="rrrRate" />
+        <NutritionInput v-model="nutritionCost" />
+        <EnchantmentSelector v-model="enchantmentLevel" :max="3" />
+        <ForceSingleCraftToggle v-model="forceSingleCraft" />
+        <PremiumToggle v-model="isPremium" />
     </div>
 
     <div class="actions flex gap-2 mb-4">

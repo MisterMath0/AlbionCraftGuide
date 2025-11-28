@@ -18,8 +18,31 @@
       <HideUnprofitableButton v-model="hideUnprofitable" />
     </div>
 
+    <Empty v-if="isLoading">
+      <EmptyContent>
+        <Spinner class="size-8" />
+        <EmptyHeader>
+          <EmptyTitle>Loading Market Data</EmptyTitle>
+          <EmptyDescription>
+            Fetching prices from the Albion Online Data Project...
+          </EmptyDescription>
+        </EmptyHeader>
+      </EmptyContent>
+    </Empty>
+
+    <Empty v-else-if="!itemMap">
+      <EmptyContent>
+        <EmptyHeader>
+          <EmptyTitle>No Market Data</EmptyTitle>
+          <EmptyDescription>
+            Click the Update button to fetch current market prices
+          </EmptyDescription>
+        </EmptyHeader>
+      </EmptyContent>
+    </Empty>
+
     <RecipeTable 
-      v-if="!isLoading && itemMap"
+      v-else
       :recipes="recipes"
       :item-names="itemNames"
       :show-enchant="false"
@@ -33,7 +56,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useSettings } from '@/composables/useSettings'
 import { useMarketData } from '@/composables/useMarketData'
 import { loadItemNames } from '@/utils/localization'
@@ -49,6 +72,8 @@ import ForceSingleCraftToggle from '@/components/controls/ForceSingleCraftToggle
 import UpdateButton from '@/components/controls/UpdateButton.vue'
 import HideUnprofitableButton from '@/components/controls/HideUnprofitableButton.vue'
 import RecipeTable from '@/components/RecipeTable.vue'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
+import { Spinner } from '@/components/ui/spinner'
 import { updateItemMap } from '@/utils/api'
 import { ItemMap } from '@/utils/Item_Map'
 
@@ -79,6 +104,11 @@ async function updateTable() {
 // Load item names and initial data
 onMounted(async () => {
   itemNames.value = await loadItemNames()
+  updateTable()
+})
+
+// Watch server changes to refetch prices
+watch(server, () => {
   updateTable()
 })
 </script>

@@ -75,7 +75,8 @@ const props = defineProps({
 
 const emit = defineEmits(['rowSelect'])
 
-const { startCity, endCity, quality, rrrRate, nutritionCost, tax, language } = useSettings()
+const settings = useSettings()
+const { startCity, endCity, quality, rrrRate, nutritionCost, tax, language, isPremium, forceSingleCraft } = settings
 const { itemMap } = useMarketData()
 
 const selectedRowId = ref(null)
@@ -133,7 +134,7 @@ const tableData = computed(() => {
       nutrition: recipe.nutrition || 0,
       quantity: recipe.quantity || 1,
       productPrice: wrappedItemMap.value.getPrice(recipe.result, qual, sellCity),
-      profit: Math.trunc(recipe.calcProfit(wrappedItemMap.value, qual, city, rrr, nutri, taxRate)),
+      profit: Math.trunc(recipe.calcProfit(wrappedItemMap.value, qual, city, rrr, nutri, taxRate, forceSingleCraft.value)),
       recipe: recipe,
       ingredients: ingredients.map(([id, qty]) => ({
         id,

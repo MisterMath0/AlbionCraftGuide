@@ -1,16 +1,18 @@
 <template>
   <div class="flex items-center gap-2">
-    <Switch
+    <Input
       id="single"
+      type="checkbox"
       :checked="modelValue"
-      @update:checked="$emit('update:modelValue', $event)"
+      @change="$emit('update:modelValue', $event.target.checked)"
+      class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary"
     />
-    <Label for="single" class="text-sm font-medium">Force Single Craft</Label>
+    <Label for="single" class="text-sm font-medium cursor-pointer">Force Single Craft</Label>
   </div>
 </template>
 
 <script setup>
-import { Switch } from '@/components/ui/switch'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 defineProps({

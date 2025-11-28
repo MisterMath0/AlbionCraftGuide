@@ -27,12 +27,17 @@ export function useMarketData() {
     return itemMap.value.getPrice(itemId, quality, city)
   }
 
+  const setItemMap = (newMap: ItemMap) => {
+    itemMap.value = newMap
+  }
+
   return {
     itemMap,
     isLoading,
     lastUpdate,
     updatePrices,
     clearData,
-    getPrice
+    getPrice,
+    setItemMap
   }
 }

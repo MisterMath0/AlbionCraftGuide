@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <div class="rounded-md border">
+    <div class="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

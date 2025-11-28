@@ -1,6 +1,6 @@
 <template>
-  <div class="cooking-view p-6">
-    <div class="controls-grid grid grid-cols-2 md:grid-cols-8 gap-4 mb-6 items-end">
+  <div class="cooking-view">
+    <div class="controls-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6 items-end">
         <ServerSelector v-model="server" />
         <CitySelector v-model="startCity" label="Start City" id="start-city" />
         <CitySelector v-model="endCity" label="End City" id="end-city" :include-avalon="true" />

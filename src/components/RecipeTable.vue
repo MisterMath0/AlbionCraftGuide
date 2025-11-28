@@ -311,16 +311,26 @@ const columns = computed(() => {
   // Selection checkbox column
   cols.push({
     id: 'select',
-    header: ({ table }) => h(Checkbox, {
-      'checked': table.getIsAllPageRowsSelected(),
-      'onUpdate:checked': (value) => table.toggleAllPageRowsSelected(!!value),
-      'ariaLabel': 'Select all',
-    }),
-    cell: ({ row }) => h(Checkbox, {
-      'checked': row.getIsSelected(),
-      'onUpdate:checked': (value) => row.toggleSelected(!!value),
-      'ariaLabel': 'Select row',
-    }),
+    header: ({ table }) => h('div', { 
+      class: 'relative z-10',
+      onClick: (e) => e.stopPropagation() 
+    }, [
+      h(Checkbox, {
+        'checked': table.getIsAllPageRowsSelected(),
+        'onUpdate:checked': (value) => table.toggleAllPageRowsSelected(!!value),
+        'ariaLabel': 'Select all',
+      })
+    ]),
+    cell: ({ row }) => h('div', { 
+      class: 'relative z-10',
+      onClick: (e) => e.stopPropagation() 
+    }, [
+      h(Checkbox, {
+        'checked': row.getIsSelected(),
+        'onUpdate:checked': (value) => row.toggleSelected(!!value),
+        'ariaLabel': 'Select row',
+      })
+    ]),
     enableSorting: false,
     enableHiding: false,
     size: 40

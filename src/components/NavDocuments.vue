@@ -4,7 +4,6 @@ import type { Component } from "vue"
 import {
   IconDots,
   IconFolder,
-  IconShare3,
   IconTrash,
 } from "@tabler/icons-vue"
 

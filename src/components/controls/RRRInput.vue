@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label'
 
 const props = defineProps({
   modelValue: Number,
-  label: { type: String, default: 'Resource Return Rate' }
+  label: { type: String, default: 'Resource Return Rate %' }
 })
 
 const emit = defineEmits(['update:modelValue'])
